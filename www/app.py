@@ -9,7 +9,7 @@ from aiohttp import web
 
 
 def index(request):
-    return web.Response(body='<h1>Awesome</h1>'.encode())
+    return web.Response(body='<h1>Awesome</h1>'.encode(), content_type='text/html', charset='UTF-8')
 
 
 async def init(loop):
