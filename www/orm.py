@@ -165,7 +165,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     async def findAll(cls, where=None, args=None, **kw):
-        ' find objects by where clause. '
+        """ Find objects by where clause. """
         sql = [cls.__select__]
         if where:
             sql.append('where')
@@ -192,7 +192,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     async def findNumber(cls, selectField, where=None, args=None):
-        ' find number by select and where. '
+        """ Find number by select and where. """
         sql = ['select %s _num_ from `%s`' % (selectField, cls.__table__)]
         if where:
             sql.append('where')
@@ -204,7 +204,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     async def find(cls, pk):
-        ' find object by primary key. '
+        """ Find object by primary key. """
         rs = await select('%s where `%s`=?' % (cls.__select__, cls.__primary_key__), [pk], 1)
         if len(rs) == 0:
             return None
