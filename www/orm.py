@@ -24,6 +24,14 @@ async def create_pool(loop, **kw):
     )
 
 
+async def close_pool():
+    logging.info('close database connection pool...')
+    global __pool
+    if __pool is not None:
+        __pool.close()
+        await __pool.wait_closed()
+
+
 async def select(sql, args, size=None):
     log(sql, args)
     global __pool
@@ -130,9 +138,9 @@ class ModelMetaclass(type):
         attrs['__fields__'] = fields  # 除主键外的属性名
         attrs['__select__'] = 'select `%s`, %s from `%s`' % (primaryKey, ', '.join(escaped_fields), tableName)
         attrs['__insert__'] = 'insert into `%s` (%s, `%s`) values (%s)' % (
-        tableName, ', '.join(escaped_fields), primaryKey, create_args_string(len(escaped_fields) + 1))
+            tableName, ', '.join(escaped_fields), primaryKey, create_args_string(len(escaped_fields) + 1))
         attrs['__update__'] = 'update `%s` set %s where `%s`=?' % (
-        tableName, ', '.join(map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)), primaryKey)
+            tableName, ', '.join(map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)), primaryKey)
         attrs['__delete__'] = 'delete from `%s` where `%s`=?' % (tableName, primaryKey)
         return type.__new__(cls, name, bases, attrs)
 
@@ -165,7 +173,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     async def findAll(cls, where=None, args=None, **kw):
-        ' find objects by where clause. '
+        """ Find objects by where clause. """
         sql = [cls.__select__]
         if where:
             sql.append('where')
@@ -192,7 +200,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     async def findNumber(cls, selectField, where=None, args=None):
-        ' find number by select and where. '
+        """ Find number by select and where. """
         sql = ['select %s _num_ from `%s`' % (selectField, cls.__table__)]
         if where:
             sql.append('where')
@@ -204,7 +212,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     async def find(cls, pk):
-        ' find object by primary key. '
+        """ Find object by primary key. """
         rs = await select('%s where `%s`=?' % (cls.__select__, cls.__primary_key__), [pk], 1)
         if len(rs) == 0:
             return None
