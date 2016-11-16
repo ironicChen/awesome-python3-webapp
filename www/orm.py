@@ -33,6 +33,7 @@ async def close_pool():
 
 
 async def select(sql, args, size=None):
+    conn = None
     log(sql, args)
     global __pool
     async with __pool.get() as conn:
@@ -43,10 +44,13 @@ async def select(sql, args, size=None):
             else:
                 rs = await cur.fetchall()
         logging.info('rows returned: %s' % len(rs))
+        if conn is not None:
+            conn.close()
         return rs
 
 
 async def execute(sql, args, autocommit=True):
+    conn = None
     log(sql)
     async with __pool.get() as conn:
         if not autocommit:
@@ -61,6 +65,8 @@ async def execute(sql, args, autocommit=True):
             if not autocommit:
                 await conn.rollback()
             raise
+        if conn is not None:
+            conn.close()
         return affected
 
 
