@@ -7,38 +7,21 @@ from aiohttp import web
 from www.apis import APIError
 
 
-def get(path):
-    """
-    Define decorator @get('/path')
-    """
-
+def request(path, *, method):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kw):
             return func(*args, **kw)
-
-        wrapper.__method__ = 'GET'
+        wrapper.__method__ = method
         wrapper.__route__ = path
         return wrapper
-
     return decorator
 
 
-def post(path):
-    """
-    Define decorator @post('/path')
-    """
-
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kw):
-            return func(*args, **kw)
-
-        wrapper.__method__ = 'POST'
-        wrapper.__route__ = path
-        return wrapper
-
-    return decorator
+get = functools.partial(request, method='GET')
+post = functools.partial(request, method='POST')
+put = functools.partial(request, method='PUT')
+delete = functools.partial(request, method='DELETE')
 
 
 def get_required_kw_args(fn):
