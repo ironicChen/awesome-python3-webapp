@@ -29,7 +29,7 @@ delete = functools.partial(request, method='DELETE')
 # RequestHandler目的就是从URL函数中分析其需要接收的参数，从request中获取必要的参数，
 # URL函数不一定是一个coroutine，因此我们用RequestHandler()来封装一个URL处理函数。
 # 调用URL函数，然后把结果转换为web.Response对象，这样，就完全符合aiohttp框架的要求：
-class RequestHandler(object):  # 初始化一个请求处理类
+class RequestHandler:  # 初始化一个请求处理类
 
     def __init__(self, app, func):
         self._func = asyncio.coroutine(func)
