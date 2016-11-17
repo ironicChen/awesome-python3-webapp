@@ -26,53 +26,6 @@ put = functools.partial(request, method='PUT')
 delete = functools.partial(request, method='DELETE')
 
 
-def get_required_kw_args(fn):
-    args = []
-    params = inspect.signature(fn).parameters
-    for name, param in params.items():
-        if param.kind == inspect.Parameter.KEYWORD_ONLY and param.default == inspect.Parameter.empty:
-            args.append(name)
-    return tuple(args)
-
-
-def get_named_kw_args(fn):
-    args = []
-    params = inspect.signature(fn).parameters
-    for name, param in params.items():
-        if param.kind == inspect.Parameter.KEYWORD_ONLY:
-            args.append(name)
-    return tuple(args)
-
-
-def has_named_kw_args(fn):
-    params = inspect.signature(fn).parameters
-    for name, param in params.items():
-        if param.kind == inspect.Parameter.KEYWORD_ONLY:
-            return True
-
-
-def has_var_kw_arg(fn):
-    params = inspect.signature(fn).parameters
-    for name, param in params.items():
-        if param.kind == inspect.Parameter.VAR_KEYWORD:
-            return True
-
-
-def has_request_arg(fn):
-    sig = inspect.signature(fn)
-    params = sig.parameters
-    found = False
-    for name, param in params.items():
-        if name == 'request':
-            found = True
-            continue
-        if found and (
-                            param.kind != inspect.Parameter.VAR_POSITIONAL and param.kind != inspect.Parameter.KEYWORD_ONLY and param.kind != inspect.Parameter.VAR_KEYWORD):
-            raise ValueError(
-                'request parameter must be the last named parameter in function: %s%s' % (fn.__name__, str(sig)))
-    return found
-
-
 # RequestHandler目的就是从URL函数中分析其需要接收的参数，从request中获取必要的参数，
 # URL函数不一定是一个coroutine，因此我们用RequestHandler()来封装一个URL处理函数。
 # 调用URL函数，然后把结果转换为web.Response对象，这样，就完全符合aiohttp框架的要求：
