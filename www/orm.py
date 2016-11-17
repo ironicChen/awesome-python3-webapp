@@ -1,4 +1,4 @@
-import asyncio, logging
+import logging
 
 import aiomysql
 

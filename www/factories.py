@@ -1,10 +1,9 @@
-import logging;
-
-logging.basicConfig(level=logging.INFO)
-
+import logging
 import json
 from aiohttp import web
 from urllib import parse
+
+logging.basicConfig(level=logging.INFO)
 
 
 async def logger_factory(app, handler):

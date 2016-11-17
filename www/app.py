@@ -1,8 +1,7 @@
-import logging;
-
-logging.basicConfig(level=logging.INFO)
-
-import asyncio, os, time
+import logging
+import asyncio
+import os
+import time
 from datetime import datetime
 
 from aiohttp import web
@@ -11,6 +10,8 @@ from jinja2 import Environment, FileSystemLoader
 from www import orm
 from www.coreweb import add_routes, add_static
 from www.factories import logger_factory, data_factory, response_factory
+
+logging.basicConfig(level=logging.INFO)
 
 
 def init_jinja2(app, **kw):

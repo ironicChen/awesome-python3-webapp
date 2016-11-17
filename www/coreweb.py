@@ -1,9 +1,9 @@
-import asyncio, os, inspect, logging, functools
-
-from urllib import parse
-
+import asyncio
+import os
+import inspect
+import logging
+import functools
 from aiohttp import web
-
 from www.apis import APIError
 
 
