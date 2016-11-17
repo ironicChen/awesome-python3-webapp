@@ -7,6 +7,7 @@ from datetime import datetime
 
 from aiohttp import web
 from jinja2 import Environment, FileSystemLoader
+from urllib import parse
 
 from www import orm
 from www.coreweb import add_routes, add_static
@@ -45,14 +46,29 @@ async def logger_factory(app, handler):
 
 async def data_factory(app, handler):
     async def parse_data(request):
-        if request.method == 'POST':
-            if request.content_type.startswith('application/json'):
+        logging.info('data_factory...')
+        if request.method in ('POST', 'PUT'):
+            if not request.content_type:
+                return web.HTTPBadRequest(text='Missing Content-Type.')
+            content_type = request.content_type.lower()
+            if content_type.startswith('application/json'):
                 request.__data__ = await request.json()
-                logging.info('request json: %s' % str(request.__data__))
-            elif request.content_type.startswith('application/x-www-form-urlencoded'):
-                request.__data__ = await request.post()
-                logging.info('request form: %s' % str(request.__data__))
-        return (await handler(request))
+                if not isinstance(request.__data__, dict):
+                    return web.HTTPBadRequest(text='JSON body must be object.')
+                logging.info('request json: %s' % request.__data__)
+            elif content_type.startswith(('application/x-www-form-urlencoded', 'multipart/form-data')):
+                params = await request.post()
+                request.__data__ = dict(**params)
+                logging.info('request form: %s' % request.__data__)
+            else:
+                return web.HTTPBadRequest(text='Unsupported Content-Type: %s' % content_type)
+        elif request.method == 'GET':
+            qs = request.query_string
+            request.__data__ = {k: v[0] for k, v in parse.parse_qs(qs, True).items()}
+            logging.info('request query: %s' % request.__data__)
+        else:
+            request.__data__ = dict()
+        return await handler(request)
 
     return parse_data
 
@@ -115,7 +131,7 @@ def datetime_filter(t):
 async def init(loop):
     await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='www-data', password='www-data', db='awesome')
     app = web.Application(loop=loop, middlewares=[
-        logger_factory, response_factory
+        logger_factory, response_factory, data_factory
     ])
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app, 'www.handlers')
