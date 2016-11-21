@@ -1,11 +1,11 @@
 from www.coreweb import get
+from www.models import User
 
 
 @get('/')
-def index():
-    return 'Hello!'
-
-
-@get('/name/{name}')
-def index2(name):
-    return 'Hello %s!' % name
+async def index(request):
+    users = await User.findAll()
+    return {
+        '__template__': 'test.html',
+        'users': users
+    }
